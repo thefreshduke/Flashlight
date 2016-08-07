@@ -22,6 +22,10 @@ class ViewController: UIViewController {
         myButton.setTitle("ON", forState: UIControlState.Normal)
         myButton.addTarget(self, action: #selector(buttonAction), forControlEvents: UIControlEvents.TouchUpInside)
         self.view.addSubview(myButton)
+        
+        let mySlider = UISlider(frame: CGRect(x: self.view.bounds.width / 2 - 125, y: self.view.bounds.height / 2 + 60, width: 250, height: 50))
+        mySlider.addTarget(self, action: #selector(sliderAction), forControlEvents: UIControlEvents.AllTouchEvents)
+        self.view.addSubview(mySlider)
     }
     
     func buttonAction(sender: UIButton!) {
@@ -69,6 +73,36 @@ class ViewController: UIViewController {
             // unlock your device
             myDevice.unlockForConfiguration()
         }
+    }
+    
+    func sliderAction(sender: UISlider!) {
+        if  myDevice.hasTorch {
+            // lock your device for configuration
+            do {
+                try myDevice.lockForConfiguration()
+            }
+            catch {
+                return
+            }
+            
+            do {
+                let brightness = sender.value
+                
+                if brightness <= 0.0 {
+                    myDevice.torchMode = AVCaptureTorchMode.Off
+                }
+                else if brightness >= 1.0 {
+                    try myDevice.setTorchModeOnWithLevel(AVCaptureMaxAvailableTorchLevel)
+                }
+                else {
+                    try self.myDevice.setTorchModeOnWithLevel(brightness)
+                }
+            }
+            catch {
+                return
+            }
+        }
+        myDevice.unlockForConfiguration()
     }
     
     override func didReceiveMemoryWarning() {
